@@ -1,0 +1,28 @@
+{
+  "kind": "collectionType",
+  "collectionName": "predicted_results",
+  "info": {
+    "singularName": "predicted-result",
+    "pluralName": "predicted-results",
+    "displayName": "Kết quả dự đoán",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "tele_id": {
+      "type": "string",
+      "required": true
+    },
+    "predicted_result": {
+      "type": "string",
+      "required": true
+    },
+    "date": {
+      "type": "date",
+      "required": false
+    }
+  }
+}

@@ -1,0 +1,21 @@
+version: "3.1"
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres_k_tech_lottery
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-k_tech_lottery}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-Admin@123}
+      - POSTGRES_DB=${POSTGRES_DB:-k_tech_lottery_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/k_tech_lottery/data
+    ports:
+      - "5441:5432"
+    restart: always
+volumes:
+  postgres_data:
+
+networks:
+  strapi:
+    name: Strapi
+    driver: bridge

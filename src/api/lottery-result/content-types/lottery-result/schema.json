@@ -1,0 +1,26 @@
+{
+  "kind": "collectionType",
+  "collectionName": "lottery_results",
+  "info": {
+    "singularName": "lottery-result",
+    "pluralName": "lottery-results",
+    "displayName": "Kết quả xổ số miền Bắc",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "result": {
+      "type": "string",
+      "unique": false,
+      "required": true
+    },
+    "date": {
+      "type": "date",
+      "required": true,
+      "unique": true
+    }
+  }
+}
