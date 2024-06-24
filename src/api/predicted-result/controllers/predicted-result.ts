@@ -11,8 +11,23 @@ function processString(input) {
   return _.replace(_.toLower(_.trim(input)), /\s+/g, "");
 }
 function formatDateTimeToVietnamTime(dateTime) {
-  // Chuyển đổi và định dạng ngày giờ với múi giờ Việt Nam (Asia/Ho_Chi_Minh)
   return moment(dateTime).tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD");
+}
+function checkAndAdjustDateTime(dateTime) {
+  let vietnamTime = moment(dateTime).tz("Asia/Ho_Chi_Minh");
+
+  const thresholdTime = vietnamTime.clone().set({
+    hour: 17,
+    minute: 30,
+    second: 0,
+    millisecond: 0,
+  });
+
+  if (vietnamTime.isAfter(thresholdTime)) {
+    vietnamTime = vietnamTime.add(1, "day");
+  }
+
+  return vietnamTime.format("YYYY-MM-DD");
 }
 function debug(name, object) {
   strapi.log.info("--------DEBUG--------");
@@ -21,7 +36,9 @@ function debug(name, object) {
   );
   strapi.log.info("--------END--------");
 }
+function checkResult(date, predicted_result) {
 
+}
 export default factories.createCoreController(
   "api::predicted-result.predicted-result",
   ({ strapi }) => ({
@@ -35,7 +52,7 @@ export default factories.createCoreController(
         return ctx.badRequest("Missing required tele_id");
       }
       let dateTime = new Date();
-      let formattedDateTime = formatDateTimeToVietnamTime(dateTime);
+      let formattedDateTime = checkAndAdjustDateTime(dateTime);
       // format date into YYYY-MM-DD
       if (formattedDateTime === "Invalid date" || !formattedDateTime) {
         return ctx.badRequest("INVALID_DATE", "date format is YYYY-MM-DD");
@@ -50,7 +67,7 @@ export default factories.createCoreController(
         }
       );
       if (predictedResult.length > 0) {
-        return ctx.badRequest("One day still is predicted 1 time");
+        return ctx.badRequest("ONE_DATE_ONE_TIME", "Chỉ được dự đoán một lần trong ngày");
       }
       const newPredictedResult = await strapi.entityService.create(
         "api::predicted-result.predicted-result",
@@ -103,8 +120,22 @@ export default factories.createCoreController(
     },
 
     async getStatistic(ctx) {
+      let { page = 1, page_size = 10, start, end } = ctx.query;
+      let endVietnamTime = moment(end).tz("Asia/Ho_Chi_Minh");
 
-      const { page = 1, page_size = 10, start, end } = ctx.query;
+      const now = moment().tz("Asia/Ho_Chi_Minh");
+      const today = now.clone().startOf("day");
+      const thresholdTime = today.clone().set({
+        hour: 17,
+        minute: 30,
+        second: 0,
+        millisecond: 0,
+      });
+
+      if (endVietnamTime.isAfter(today) && now.isBefore(thresholdTime)) {
+        endVietnamTime = today.clone().subtract(1, "day");
+        end = endVietnamTime.format("YYYY-MM-DD");
+      }
       const predictResult = await strapi.entityService.findMany(
         "api::predicted-result.predicted-result",
         {
@@ -116,13 +147,24 @@ export default factories.createCoreController(
           },
         }
       );
+      const realResult = await strapi.entityService.findMany("api::lottery-result.lottery-result", {
+        filters: {
+          date: {
+            $gte: start,
+            $lte: end,
+          }
+        }
+      })
       const teleIdCount = {};
       predictResult.forEach((result) => {
         if (result.tele_id) {
           if (!teleIdCount[result.tele_id]) {
             teleIdCount[result.tele_id] = 0;
           }
-          teleIdCount[result.tele_id]++;
+          const correspondingRealResult = realResult.find(real => real.date === result.date && real.result === result.predicted_result);
+          if (correspondingRealResult) {
+            teleIdCount[result.tele_id]++;
+          }
         }
       });
 
@@ -189,5 +231,6 @@ export default factories.createCoreController(
         pagination,
       });
     },
+
   })
 );
