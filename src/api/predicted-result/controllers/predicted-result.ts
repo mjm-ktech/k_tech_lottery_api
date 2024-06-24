@@ -5,13 +5,23 @@
 import { factories } from "@strapi/strapi";
 import _ from "lodash";
 import moment from "moment-timezone";
+import util from "util";
+
 function processString(input) {
   return _.replace(_.toLower(_.trim(input)), /\s+/g, "");
 }
 function formatDateTimeToVietnamTime(dateTime) {
   // Chuyển đổi và định dạng ngày giờ với múi giờ Việt Nam (Asia/Ho_Chi_Minh)
-  return moment(dateTime).tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DD');
+  return moment(dateTime).tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DD");
 }
+function debug(name, object) {
+  strapi.log.info("--------DEBUG--------");
+  strapi.log.info(
+    `${name}: ${util.inspect(object, { showHidden: false, depth: null })}`
+  );
+  strapi.log.info("--------END--------");
+}
+
 export default factories.createCoreController(
   "api::predicted-result.predicted-result",
   ({ strapi }) => ({
@@ -30,13 +40,25 @@ export default factories.createCoreController(
       if (formattedDateTime === "Invalid date" || !formattedDateTime) {
         return ctx.badRequest("INVALID_DATE", "date format is YYYY-MM-DD");
       }
+      const predictedResult = await strapi.entityService.findMany(
+        "api::predicted-result.predicted-result",
+        {
+          filters: {
+            tele_id: tele_id,
+            date: formattedDateTime,
+          },
+        }
+      );
+      if (predictedResult.length > 0) {
+        return ctx.badRequest("One day still is predicted 1 time");
+      }
       const newPredictedResult = await strapi.entityService.create(
         "api::predicted-result.predicted-result",
         {
           data: {
             tele_id: tele_id,
             predicted_result: predicted_result,
-            date: formattedDateTime
+            date: formattedDateTime,
           },
         }
       );
@@ -81,17 +103,50 @@ export default factories.createCoreController(
     },
 
     async getStatistic(ctx) {
-      let { type } = ctx.params;
-      if (!type) {
-        type = "week";
-      } else {
-        type = processString(type);
-      }
 
-      const result = await strapi.entityService.findMany(
+      const { page = 1, page_size = 10, start, end } = ctx.query;
+      const predictResult = await strapi.entityService.findMany(
         "api::predicted-result.predicted-result",
-        {}
+        {
+          filters: {
+            date: {
+              $gte: start,
+              $lte: end,
+            },
+          },
+        }
       );
+      const teleIdCount = {};
+      predictResult.forEach((result) => {
+        if (result.tele_id) {
+          if (!teleIdCount[result.tele_id]) {
+            teleIdCount[result.tele_id] = 0;
+          }
+          teleIdCount[result.tele_id]++;
+        }
+      });
+
+      // Chuyển đổi kết quả thành mảng theo định dạng yêu cầu
+      const response = Object.keys(teleIdCount).map((teleId) => ({
+        tele_id: teleId,
+        count: teleIdCount[teleId],
+      }));
+
+      const startIndex = (page - 1) * page_size;
+      const endIndex = page * page_size;
+
+      // Lấy dữ liệu phân trang
+      const paginatedResponse = response.slice(startIndex, endIndex);
+
+      // Tạo đối tượng trả về bao gồm dữ liệu và thông tin phân trang
+      const result = {
+        totalItems: response.length,
+        totalPages: Math.ceil(response.length / page_size),
+        pageSize: page_size,
+        data: paginatedResponse,
+      };
+
+      return result;
     },
 
     async find(ctx) {
@@ -130,7 +185,9 @@ export default factories.createCoreController(
         }
       );
       // transformResponse correctly formats the data and meta fields of your results to return to the API
-      return this.transformResponse(predictedResultWithLotteryResult, { pagination });
+      return this.transformResponse(predictedResultWithLotteryResult, {
+        pagination,
+      });
     },
   })
 );
