@@ -16,13 +16,22 @@
       "type": "string",
       "required": true
     },
-    "predicted_result": {
+    "special_result": {
       "type": "string",
       "required": true
     },
     "date": {
       "type": "date",
       "required": false
+    },
+    "medium_result_1": {
+      "type": "string"
+    },
+    "medium_result_2": {
+      "type": "string"
+    },
+    "medium_result_3": {
+      "type": "string"
     }
   }
 }

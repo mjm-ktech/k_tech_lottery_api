@@ -43,9 +43,9 @@ export default factories.createCoreController(
   "api::predicted-result.predicted-result",
   ({ strapi }) => ({
     create: async (ctx) => {
-      const { predicted_result, tele_id } = ctx.request.body;
-      if (!predicted_result) {
-        return ctx.badRequest("Missing required predicted_result");
+      const { special_result, tele_id, medium_result_1, medium_result_2, medium_result_3 } = ctx.request.body;
+      if (!special_result) {
+        return ctx.badRequest("Missing required special_result");
       }
 
       if (!tele_id) {
@@ -74,7 +74,10 @@ export default factories.createCoreController(
         {
           data: {
             tele_id: tele_id,
-            predicted_result: predicted_result,
+            special_result: special_result,
+            medium_result_1: medium_result_1,
+            medium_result_2: medium_result_2,
+            medium_result_3: medium_result_3,
             date: formattedDateTime,
           },
         }
@@ -159,11 +162,26 @@ export default factories.createCoreController(
       predictResult.forEach((result) => {
         if (result.tele_id) {
           if (!teleIdCount[result.tele_id]) {
-            teleIdCount[result.tele_id] = 0;
+            teleIdCount[result.tele_id] = {
+              special: 0,
+              medium: 0,
+            };
           }
-          const correspondingRealResult = realResult.find(real => real.date === result.date && real.result === result.predicted_result);
+          const correspondingRealResult = realResult.find(real => real.date === result.date && real.result === result.special_result && real.type === "SPECIAL");
           if (correspondingRealResult) {
-            teleIdCount[result.tele_id]++;
+            teleIdCount[result.tele_id].special++;
+          }
+          const correspondingRealResult1 = realResult.find(real => real.date === result.date && real.result === result.medium_result_1 && real.type === "MEDIUM");
+          if (correspondingRealResult1) {
+            teleIdCount[result.tele_id].medium++;
+          }
+          const correspondingRealResult2 = realResult.find(real => real.date === result.date && real.result === result.medium_result_2 && real.type === "MEDIUM");
+          if (correspondingRealResult2) {
+            teleIdCount[result.tele_id].medium++;
+          }
+          const correspondingRealResult3 = realResult.find(real => real.date === result.date && real.result === result.medium_result_3 && real.type === "MEDIUM");
+          if (correspondingRealResult3) {
+            teleIdCount[result.tele_id].medium++;
           }
         }
       });
@@ -171,7 +189,8 @@ export default factories.createCoreController(
       // Chuyển đổi kết quả thành mảng theo định dạng yêu cầu
       const response = Object.keys(teleIdCount).map((teleId) => ({
         tele_id: teleId,
-        count: teleIdCount[teleId],
+        special_count: teleIdCount[teleId].special,
+        medium_count: teleIdCount[teleId].medium
       }));
 
       const startIndex = (page - 1) * page_size;

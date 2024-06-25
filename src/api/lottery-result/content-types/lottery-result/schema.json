@@ -20,7 +20,15 @@
     "date": {
       "type": "date",
       "required": true,
-      "unique": true
+      "unique": false
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": [
+        "SPECIAL",
+        "MEDIUM"
+      ],
+      "default": "MEDIUM"
     }
   }
 }

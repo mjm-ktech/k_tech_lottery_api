@@ -801,7 +801,9 @@ export interface ApiLotteryResultLotteryResult extends Schema.CollectionType {
   };
   attributes: {
     result: Attribute.String & Attribute.Required;
-    date: Attribute.Date & Attribute.Required & Attribute.Unique;
+    date: Attribute.Date & Attribute.Required;
+    type: Attribute.Enumeration<['SPECIAL', 'MEDIUM']> &
+      Attribute.DefaultTo<'MEDIUM'>;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
@@ -833,8 +835,11 @@ export interface ApiPredictedResultPredictedResult
   };
   attributes: {
     tele_id: Attribute.String & Attribute.Required;
-    predicted_result: Attribute.String & Attribute.Required;
+    special_result: Attribute.String & Attribute.Required;
     date: Attribute.Date;
+    medium_result_1: Attribute.String;
+    medium_result_2: Attribute.String;
+    medium_result_3: Attribute.String;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
