@@ -9,7 +9,7 @@ export default factories.createCoreController(
   ({ strapi }) => ({
     async create(ctx) {
       try {
-        let { result, date } = ctx.request.body;
+        let { result, date, type } = ctx.request.body;
 
         if (!result || !date) {
           return ctx.badRequest("Missing required parameter");
@@ -19,12 +19,28 @@ export default factories.createCoreController(
         if (date === "Invalid date" || !date) {
           return ctx.badRequest("INVALID_DATE", "date format is YYYY-MM-DD");
         }
+        const lotteryResult = await strapi.entityService.findMany(
+          "api::lottery-result.lottery-result",
+          {
+            filters: {
+              date,
+              type: "SPECIAL",
+            },
+          }
+        );
+        if (type === "SPECIAL" && lotteryResult.length > 0) {
+          return ctx.badRequest(
+            "ONE_DAY_ONE_SPECIAL_LOTTERY",
+            "One day still is created 1 special lottery result"
+          );
+        }
         const newLotteryResult = await strapi.entityService.create(
           "api::lottery-result.lottery-result",
           {
             data: {
               result,
               date,
+              type,
             },
           }
         );
