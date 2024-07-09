@@ -191,10 +191,12 @@ export default factories.createCoreController(
       // Chuyển đổi kết quả thành mảng theo định dạng yêu cầu
       const response = Object.keys(teleIdCount).map((teleId) => ({
         tele_id: teleId,
-        special_count: teleIdCount[teleId].special,
-        medium_count: teleIdCount[teleId].medium
+        special_point: Number(teleIdCount[teleId].special) * 70,
+        medium_point: Number(teleIdCount[teleId].medium) * 5
       }));
 
+      // sort response by special_point + medium_point
+      response.sort((a, b) => b.special_point + b.medium_point - (a.special_point + a.medium_point));
       const startIndex = (page - 1) * page_size;
       const endIndex = page * page_size;
 
