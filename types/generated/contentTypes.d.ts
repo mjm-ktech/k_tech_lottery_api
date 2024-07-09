@@ -840,6 +840,7 @@ export interface ApiPredictedResultPredictedResult
     medium_result_1: Attribute.String;
     medium_result_2: Attribute.String;
     medium_result_3: Attribute.String;
+    site: Attribute.String;
     createdAt: Attribute.DateTime;
     updatedAt: Attribute.DateTime;
     createdBy: Attribute.Relation<

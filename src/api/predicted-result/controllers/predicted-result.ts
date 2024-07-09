@@ -43,7 +43,7 @@ export default factories.createCoreController(
   "api::predicted-result.predicted-result",
   ({ strapi }) => ({
     create: async (ctx) => {
-      const { special_result, tele_id, medium_result_1, medium_result_2, medium_result_3 } = ctx.request.body;
+      const { special_result, tele_id, medium_result_1, medium_result_2, medium_result_3, site } = ctx.request.body;
       if (!special_result) {
         return ctx.badRequest("Missing required special_result");
       }
@@ -62,12 +62,13 @@ export default factories.createCoreController(
         {
           filters: {
             tele_id: tele_id,
+            site: site,
             date: formattedDateTime,
           },
         }
       );
       if (predictedResult.length > 0) {
-        return ctx.badRequest("ONE_DATE_ONE_TIME", "Chỉ được dự đoán một lần trong ngày");
+        return ctx.badRequest("ONE_DATE_ONE_SITE_ONE_TIME", "Chỉ được dự đoán 1 site 1 lần trong ngày");
       }
       const newPredictedResult = await strapi.entityService.create(
         "api::predicted-result.predicted-result",
@@ -79,6 +80,7 @@ export default factories.createCoreController(
             medium_result_2: medium_result_2,
             medium_result_3: medium_result_3,
             date: formattedDateTime,
+            site: site
           },
         }
       );

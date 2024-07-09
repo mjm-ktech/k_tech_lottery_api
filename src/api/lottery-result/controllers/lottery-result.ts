@@ -40,12 +40,13 @@ export default factories.createCoreController(
             data: {
               result,
               date,
-              type,
+              type: type || "MEDIUM",
             },
           }
         );
         return newLotteryResult;
       } catch (e) {
+        strapi.log.info(e);
         return ctx.badRequest(
           "ONE_DAY_ONE_LOTTERY",
           "One day still is created 1 lottery result"

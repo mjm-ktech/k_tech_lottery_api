@@ -32,6 +32,9 @@
     },
     "medium_result_3": {
       "type": "string"
+    },
+    "site": {
+      "type": "string"
     }
   }
 }
