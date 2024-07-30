@@ -53,5 +53,16 @@ export default factories.createCoreController(
         );
       }
     },
+
+    async createByExcel(ctx) {
+      try {
+        strapi.service("api::lottery-result.lottery-result").createByExcel();
+        return {
+          message: "Chương trình đang bắt đầu tiến trình tạo kết quá xổ số miền Bắc"
+        }
+      } catch (e) {
+        strapi.log.info(e);
+      }
+    },
   })
 );

@@ -1,0 +1,22 @@
+{
+  "kind": "collectionType",
+  "collectionName": "leader_tops",
+  "info": {
+    "singularName": "leader-top",
+    "pluralName": "leader-tops",
+    "displayName": "Leader top",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "tele_id": {
+      "type": "string"
+    },
+    "total_score": {
+      "type": "biginteger"
+    }
+  }
+}

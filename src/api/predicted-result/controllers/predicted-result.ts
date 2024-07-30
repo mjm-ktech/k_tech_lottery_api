@@ -36,14 +36,19 @@ function debug(name, object) {
   );
   strapi.log.info("--------END--------");
 }
-function checkResult(date, predicted_result) {
-
-}
+function checkResult(date, predicted_result) {}
 export default factories.createCoreController(
   "api::predicted-result.predicted-result",
   ({ strapi }) => ({
     create: async (ctx) => {
-      const { special_result, tele_id, medium_result_1, medium_result_2, medium_result_3, site } = ctx.request.body;
+      const {
+        special_result,
+        tele_id,
+        medium_result_1,
+        medium_result_2,
+        medium_result_3,
+        site,
+      } = ctx.request.body;
       if (!special_result) {
         return ctx.badRequest("Missing required special_result");
       }
@@ -68,7 +73,10 @@ export default factories.createCoreController(
         }
       );
       if (predictedResult.length > 0) {
-        return ctx.badRequest("ONE_DATE_ONE_SITE_ONE_TIME", "Chỉ được dự đoán 1 site 1 lần trong ngày");
+        return ctx.badRequest(
+          "ONE_DATE_ONE_SITE_ONE_TIME",
+          "Chỉ được dự đoán 1 site 1 lần trong ngày"
+        );
       }
       const newPredictedResult = await strapi.entityService.create(
         "api::predicted-result.predicted-result",
@@ -80,7 +88,7 @@ export default factories.createCoreController(
             medium_result_2: medium_result_2,
             medium_result_3: medium_result_3,
             date: formattedDateTime,
-            site: site
+            site: site,
           },
         }
       );
@@ -152,14 +160,17 @@ export default factories.createCoreController(
           },
         }
       );
-      const realResult = await strapi.entityService.findMany("api::lottery-result.lottery-result", {
-        filters: {
-          date: {
-            $gte: start,
-            $lte: end,
-          }
+      const realResult = await strapi.entityService.findMany(
+        "api::lottery-result.lottery-result",
+        {
+          filters: {
+            date: {
+              $gte: start,
+              $lte: end,
+            },
+          },
         }
-      })
+      );
       const teleIdCount = {};
       predictResult.forEach((result) => {
         if (result.tele_id) {
@@ -169,20 +180,24 @@ export default factories.createCoreController(
               medium: 0,
             };
           }
-          const correspondingRealResult = realResult.find(real => real.date === result.date && real.result === result.special_result && real.type === "SPECIAL");
+          const correspondingRealResult = realResult.find(
+            (real) =>
+              real.date === result.date &&
+              real.result === result.special_result &&
+              real.type === "SPECIAL"
+          );
           if (correspondingRealResult) {
             teleIdCount[result.tele_id].special++;
           }
-          const correspondingRealResult1 = realResult.find(real => real.date === result.date && real.result === result.medium_result_1 && real.type === "MEDIUM");
+          const correspondingRealResult1 = realResult.find(
+            (real) =>
+              real.date === result.date &&
+              (real.result === result.medium_result_1 ||
+                real.result === result.medium_result_2 ||
+                real.result === result.medium_result_3) &&
+              real.type === "MEDIUM"
+          );
           if (correspondingRealResult1) {
-            teleIdCount[result.tele_id].medium++;
-          }
-          const correspondingRealResult2 = realResult.find(real => real.date === result.date && real.result === result.medium_result_2 && real.type === "MEDIUM");
-          if (correspondingRealResult2) {
-            teleIdCount[result.tele_id].medium++;
-          }
-          const correspondingRealResult3 = realResult.find(real => real.date === result.date && real.result === result.medium_result_3 && real.type === "MEDIUM");
-          if (correspondingRealResult3) {
             teleIdCount[result.tele_id].medium++;
           }
         }
@@ -192,11 +207,14 @@ export default factories.createCoreController(
       const response = Object.keys(teleIdCount).map((teleId) => ({
         tele_id: teleId,
         special_point: Number(teleIdCount[teleId].special) * 70,
-        medium_point: Number(teleIdCount[teleId].medium) * 5
+        medium_point: Number(teleIdCount[teleId].medium) * 5,
       }));
 
       // sort response by special_point + medium_point
-      response.sort((a, b) => b.special_point + b.medium_point - (a.special_point + a.medium_point));
+      response.sort(
+        (a, b) =>
+          b.special_point + b.medium_point - (a.special_point + a.medium_point)
+      );
       const startIndex = (page - 1) * page_size;
       const endIndex = page * page_size;
 
@@ -255,5 +273,44 @@ export default factories.createCoreController(
       });
     },
 
+    async findByTele(ctx) {
+      const { tele_id } = ctx.params;
+      const predictResult = await strapi.entityService.findMany(
+        "api::predicted-result.predicted-result",
+        {
+          filters: {
+            tele_id,
+          },
+          limit: -1,
+          sort: "date:desc",
+        }
+      );
+
+      const realResult = await strapi.entityService.findMany(
+        "api::lottery-result.lottery-result",
+        {
+          limit: -1,
+          sort: "date:desc",
+        }
+      );
+    },
   })
 );
+
+const getWeekNumber = (d) => {
+  const date = new Date(d);
+  date.setHours(0, 0, 0, 0);
+  date.setDate(date.getDate() + 3 - ((date.getDay() + 6) % 7));
+  const week1 = new Date(date.getFullYear(), 0, 4);
+  return (
+    1 +
+    Math.round(
+      ((date.getTime() - week1.getTime()) / 86400000 -
+        3 +
+        ((week1.getDay() + 6) % 7)) /
+        7
+    )
+  );
+};
+
+

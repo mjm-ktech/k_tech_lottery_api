@@ -1,0 +1,37 @@
+{
+  "kind": "collectionType",
+  "collectionName": "plugins",
+  "info": {
+    "singularName": "plugin",
+    "pluralName": "plugins",
+    "displayName": "Plugin",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "website": {
+      "type": "string"
+    },
+    "banner": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "short_code": {
+      "type": "customField",
+      "options": {
+        "uuid-format": "^[A-Z0-9]{10}$"
+      },
+      "customField": "plugin::strapi-advanced-uuid.uuid"
+    }
+  }
+}

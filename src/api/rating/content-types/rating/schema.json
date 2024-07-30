@@ -1,0 +1,51 @@
+{
+  "kind": "collectionType",
+  "collectionName": "ratings",
+  "info": {
+    "singularName": "rating",
+    "pluralName": "ratings",
+    "displayName": "Rating",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "tele_id": {
+      "type": "string"
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": [
+        "DAY",
+        "WEEK",
+        "MONTH"
+      ]
+    },
+    "day": {
+      "type": "integer",
+      "min": 1,
+      "max": 31
+    },
+    "month": {
+      "type": "integer",
+      "min": 1,
+      "max": 12
+    },
+    "year": {
+      "type": "integer",
+      "min": 2024
+    },
+    "places": {
+      "type": "integer"
+    },
+    "total_score": {
+      "type": "integer",
+      "default": 0
+    },
+    "week": {
+      "type": "integer"
+    }
+  }
+}

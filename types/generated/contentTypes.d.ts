@@ -788,6 +788,37 @@ export interface PluginUsersPermissionsUser extends Schema.CollectionType {
   };
 }
 
+export interface ApiLeaderTopLeaderTop extends Schema.CollectionType {
+  collectionName: 'leader_tops';
+  info: {
+    singularName: 'leader-top';
+    pluralName: 'leader-tops';
+    displayName: 'Leader top';
+    description: '';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    tele_id: Attribute.String;
+    total_score: Attribute.BigInteger;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::leader-top.leader-top',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::leader-top.leader-top',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
 export interface ApiLotteryResultLotteryResult extends Schema.CollectionType {
   collectionName: 'lottery_results';
   info: {
@@ -814,6 +845,51 @@ export interface ApiLotteryResultLotteryResult extends Schema.CollectionType {
       Attribute.Private;
     updatedBy: Attribute.Relation<
       'api::lottery-result.lottery-result',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
+export interface ApiPluginPlugin extends Schema.CollectionType {
+  collectionName: 'plugins';
+  info: {
+    singularName: 'plugin';
+    pluralName: 'plugins';
+    displayName: 'Plugin';
+    description: '';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    website: Attribute.String;
+    banner: Attribute.Media<'images' | 'files' | 'videos' | 'audios'>;
+    short_code: Attribute.UID<
+      undefined,
+      undefined,
+      {
+        'uuid-format': '^[A-Z0-9]{10}$';
+      }
+    > &
+      Attribute.CustomField<
+        'plugin::strapi-advanced-uuid.uuid',
+        {
+          'uuid-format': '^[A-Z0-9]{10}$';
+        }
+      >;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::plugin.plugin',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::plugin.plugin',
       'oneToOne',
       'admin::user'
     > &
@@ -858,6 +934,86 @@ export interface ApiPredictedResultPredictedResult
   };
 }
 
+export interface ApiRatingRating extends Schema.CollectionType {
+  collectionName: 'ratings';
+  info: {
+    singularName: 'rating';
+    pluralName: 'ratings';
+    displayName: 'Rating';
+    description: '';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    tele_id: Attribute.String;
+    type: Attribute.Enumeration<['DAY', 'WEEK', 'MONTH']>;
+    day: Attribute.Integer &
+      Attribute.SetMinMax<
+        {
+          min: 1;
+          max: 31;
+        },
+        number
+      >;
+    month: Attribute.Integer &
+      Attribute.SetMinMax<
+        {
+          min: 1;
+          max: 12;
+        },
+        number
+      >;
+    year: Attribute.Integer &
+      Attribute.SetMinMax<
+        {
+          min: 2024;
+        },
+        number
+      >;
+    places: Attribute.Integer;
+    total_score: Attribute.Integer & Attribute.DefaultTo<0>;
+    week: Attribute.Integer;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      'api::rating.rating',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<
+      'api::rating.rating',
+      'oneToOne',
+      'admin::user'
+    > &
+      Attribute.Private;
+  };
+}
+
+export interface ApiRuleRule extends Schema.SingleType {
+  collectionName: 'rules';
+  info: {
+    singularName: 'rule';
+    pluralName: 'rules';
+    displayName: 'Rule';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    rule: Attribute.Text;
+    introduce: Attribute.Text;
+    createdAt: Attribute.DateTime;
+    updatedAt: Attribute.DateTime;
+    publishedAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<'api::rule.rule', 'oneToOne', 'admin::user'> &
+      Attribute.Private;
+    updatedBy: Attribute.Relation<'api::rule.rule', 'oneToOne', 'admin::user'> &
+      Attribute.Private;
+  };
+}
+
 declare module '@strapi/types' {
   export module Shared {
     export interface ContentTypes {
@@ -876,8 +1032,12 @@ declare module '@strapi/types' {
       'plugin::users-permissions.permission': PluginUsersPermissionsPermission;
       'plugin::users-permissions.role': PluginUsersPermissionsRole;
       'plugin::users-permissions.user': PluginUsersPermissionsUser;
+      'api::leader-top.leader-top': ApiLeaderTopLeaderTop;
       'api::lottery-result.lottery-result': ApiLotteryResultLotteryResult;
+      'api::plugin.plugin': ApiPluginPlugin;
       'api::predicted-result.predicted-result': ApiPredictedResultPredictedResult;
+      'api::rating.rating': ApiRatingRating;
+      'api::rule.rule': ApiRuleRule;
     }
   }
 }
