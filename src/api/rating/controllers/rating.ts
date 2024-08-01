@@ -280,5 +280,6 @@ const convertData = (data, period) => {
   return Object.keys(data).map(key => {
     const pointKey = Object.keys(data[key])[0]; // Lấy khóa đầu tiên, ví dụ: this_month, last_week, ...
     return { tele_id: key, point: data[key][pointKey] };
-  }).sort((a, b) => b.point - a.point); // Sắp xếp theo point từ lớn đến nhỏ
+  }).sort((a, b) => b.point - a.point)
+    .slice(0, 20); // Sắp xếp theo point từ lớn đến nhỏ
 };
