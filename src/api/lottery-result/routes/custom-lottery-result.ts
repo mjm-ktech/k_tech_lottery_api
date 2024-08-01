@@ -4,6 +4,6 @@ export default {
       method: "GET",
       path: "/lottery-result",
       handler: "lottery-result.createByExcel",
-    },
+    }
   ],
 };
