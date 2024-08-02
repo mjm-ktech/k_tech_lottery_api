@@ -99,7 +99,54 @@ export default factories.createCoreController(
             return acc;
           }, 0),
         ]);
+      const predictedResults = await strapi.entityService.findMany(
+        "api::predicted-result.predicted-result",
+        {
+          filters: {
+            tele_id: tele_id,
+          },
+          sort: {
+            date: "desc",
+          },
+          limit: 7
+        },
+      );
+      let records = [];
+      for (const predictedResult of predictedResults) {
+        let data: any = {};
+        data.date = predictedResult.date;
+        let predict_results = [];
+        const lotteryResult = await strapi.entityService.findMany(
+          "api::lottery-result.lottery-result",
+          {
+            filters: {
+              date: predictedResult.date,
+            }
+          }
+        );
+        predict_results.push({
+          special_result: predictedResult.special_result,
+          status: lotteryResult.find((lot) =>  (lot.result === predictedResult.special_result) && lot.type === "SPECIAL") ? true : false
+        });
 
+        predict_results.push({
+          medium_result_1: predictedResult.medium_result_1,
+          status: lotteryResult.find((lot) =>  (lot.result === predictedResult.medium_result_1) && lot.type === "MEDIUM") ? true : false
+        });
+
+        predict_results.push({
+          medium_result_2: predictedResult.medium_result_2,
+          status: lotteryResult.find((lot) =>  (lot.result === predictedResult.medium_result_2) && lot.type === "MEDIUM") ? true : false
+        });
+
+        predict_results.push({
+          medium_result_3: predictedResult.medium_result_3,
+          status: lotteryResult.find((lot) =>  (lot.result === predictedResult.medium_result_3) && lot.type === "MEDIUM") ? true : false
+        });
+
+        data.predict_result = predict_results;
+        records.push(data);
+      };
       return {
         tele_id: tele_id,
         data: {
@@ -109,6 +156,7 @@ export default factories.createCoreController(
           last_month: lastMonth,
           year: year,
         },
+        records
       };
     },
 
