@@ -41,7 +41,6 @@ export default factories.createCoreService(
           "Giải 7",
         ]);
         const rows = await sheet.getRows();
-
         for (let i = 0; i < rows.length; i++) {
           const row = rows[i];
           const date = moment(row.get("Ngày"), "DD/MM/YYYY").format(
@@ -49,7 +48,7 @@ export default factories.createCoreService(
           );
           const specialPrice = row.get("Giải đặc biệt");
           if (!specialPrice || !date) {
-            break;
+            continue;
           }
           const lotteryResult = await strapi.entityService.findMany(
             "api::lottery-result.lottery-result",
@@ -61,7 +60,7 @@ export default factories.createCoreService(
             }
           );
           if (lotteryResult.length > 0) {
-            break;
+            continue;
           } else {
             await strapi.entityService.create(
               "api::lottery-result.lottery-result",
