@@ -21,7 +21,6 @@ export default factories.createCoreService(
           sort: "date:desc",
         }
       );
-      debug("predictedResults", predictedResults);
       const realResult = await strapi.entityService.findMany(
         "api::lottery-result.lottery-result",
         {
@@ -366,7 +365,7 @@ export default factories.createCoreService(
           }}
         );
         if (leaderTop.length > 0) {
-          await strapi.db.connection("leader-tops")
+          await strapi.db.connection("leader_tops")
             .where({ id: leaderTop[0].id })
             .increment("total_score", item.total_point);
         } else {
